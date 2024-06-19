@@ -341,7 +341,7 @@ __global__ void mapKernel(
     
     int index = blockIdx.x * blockDim.x + threadIdx.x;
     if (index < out_size){
-      to_index(index, out_index, out_shape, shape_size);
+      to_index(index, out_shape, out_index, shape_size);
       broadcast_index(out_index, out_shape, in_shape, in_index, shape_size, shape_size);
       int in_index_position = index_to_position(in_index, in_strides, shape_size);
       out[index] = fn(fn_id, in_storage[in_index_position]);
