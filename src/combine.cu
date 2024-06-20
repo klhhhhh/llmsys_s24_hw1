@@ -246,45 +246,44 @@ __global__ void MatrixMultiplyKernel(
     int row = blockIdx.x * blockDim.x + threadIdx.x;
     int col = blockIdx.y * blockDim.y + threadIdx.y;
 
-    if (row < out_shape[1] && col < out_shape[2]) {
-      int block_row = threadIdx.x;
-      int block_col = threadIdx.y;
+    int block_row = threadIdx.x;
+    int block_col = threadIdx.y;
 
-      float out_result = 0;
+    float out_result = 0;
 
-      for (int i = 0; i < a_shape[2]; i += TILE) {
+    for (int i = 0; i < (a_shape[2] + TILE - 1) / TILE; i++) {
 
-        if (i + block_col < a_shape[2]) {
-          int a_index[3] = {batch, row, i + block_col};
-          a_shared[block_row][block_col] = a_storage[index_to_position(a_index, a_strides, 3)];
-        }
-        else {
-          a_shared[block_row][block_col] = 0;
-        }
-
-        if (i + block_row < a_shape[2]){
-          int b_index[3] = {batch, i + block_row, col};
-          b_shared[block_row][block_col] = b_storage[index_to_position(b_index, b_strides, 3)];
-        }
-        else{
-          b_shared[block_row][block_col] = 0;
-        }
-
-        __syncthreads();
-
-        for (int k = 0; k < TILE; k++){
-          if ( k + i >= a_shape[2])
-            break;
-          out_result += a_shared[block_row][k] * b_shared[k][block_col];
-        }
-
-        __syncthreads();
+      if (row < a_shape[1] && i * TILE + block_col < a_shape[2]) {
+        int a_index[3] = {batch, row, i * TILE + block_col};
+        a_shared[block_row][block_col] = a_storage[index_to_position(a_index, a_strides, 3)];
+      }
+      else {
+        a_shared[block_row][block_col] = 0;
       }
 
+      if (i * TILE + block_row < b_shape[1] && col < b_shape[2]){
+        int b_index[3] = {batch, i * TILE + block_row, col};
+        b_shared[block_row][block_col] = b_storage[index_to_position(b_index, b_strides, 3)];
+      }
+      else{
+        b_shared[block_row][block_col] = 0;
+      }
+
+      __syncthreads();
+
+      for (int k = 0; k < TILE; k++){
+        if (i * TILE + k < a_shape[2])
+          out_result += a_shared[block_row][k] * b_shared[k][block_col];
+      }
+
+      __syncthreads();
+
+    }
+
+    if (row < out_shape[1] && col < out_shape[2]) {
       int out_index[3] = {batch, row, col};
       out[index_to_position(out_index, out_strides, 3)] = out_result;
     }
-    
 
     // assert(false && "Not Implemented");
     /// END ASSIGN1_2
@@ -403,6 +402,8 @@ __global__ void reduceKernel(
     // 3. Initialize the reduce_value to the output element
     // 4. Iterate over the reduce_dim dimension of the input array to compute the reduced value
     // 5. Write the reduced value to out memory
+
+
     
     assert(false && "Not Implemented");
     /// END ASSIGN1_2
