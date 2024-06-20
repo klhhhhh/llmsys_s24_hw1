@@ -182,8 +182,20 @@ class CudaKernelOps(TensorOps):
             # BEGIN ASSIGN1_2
             # TODO
             # 1. Call the tensorReduce function implemented in CUDA
-            
-            raise NotImplementedError("Reduce Function Not Implemented Yet")
+            lib.tensorReduce(
+                out._tensor._storage,
+                out._tensor._shape.astype(np.int32),
+                out._tensor._strides.astype(np.int32),
+                out.size,
+                a._tensor._storage,
+                a._tensor._shape.astype(np.int32),
+                a._tensor._strides.astype(np.int32),
+                dim,
+                reduce_value,
+                len(a.shape),
+                fn_id
+            )
+            # raise NotImplementedError("Reduce Function Not Implemented Yet")
             # END ASSIGN1_2
             
             return out
