@@ -272,8 +272,7 @@ __global__ void MatrixMultiplyKernel(
       __syncthreads();
 
       for (int k = 0; k < TILE; k++){
-        if (i * TILE + k < a_shape[2])
-          out_result += a_shared[block_row][k] * b_shared[k][block_col];
+        out_result += a_shared[block_row][k] * b_shared[k][block_col];
       }
 
       __syncthreads();
