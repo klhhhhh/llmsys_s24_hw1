@@ -33,8 +33,11 @@ class Linear(minitorch.Module):
         # 2. Initialize self.bias to be a random parameter of (out_size)
         # 3. Set self.out_size to be out_size
         # HINT: make sure to use the RParam function
-    
-        raise NotImplementedError
+        self.weights = minitorch.rand((in_size, out_size), backend=BACKEND)
+        self.bias = minitorch.rand((out_size), backend=BACKEND)
+        self.out_size = out_size
+
+        # raise NotImplementedError
     
         # END ASSIGN1_3
 
@@ -49,8 +52,12 @@ class Linear(minitorch.Module):
         # 3. Apply Matrix Multiplication on input x and self.weights, and reshape the output to be of size (batch, self.out_size)
         # 4. Add self.bias
         # HINT: You can use the view function of minitorch.tensor for reshape
-
-        raise NotImplementedError
+        x.view(batch, in_size)
+        output = x @ self.weights
+        output.view(batch, self.out_size)
+        output = minitorch.add(output, self.bias)
+        return output
+        # raise NotImplementedError
     
         # END ASSIGN1_3
         
@@ -83,7 +90,10 @@ class Network(minitorch.Module):
         # TODO
         # 1. Construct two linear layers: the first one is embedding_dim * hidden_dim, the second one is hidden_dim * 1
 
-        raise NotImplementedError
+        self.linear1 = Linear(embedding_dim, hidden_dim)
+        self.linear2 = Linear(hidden_dim, 1)
+
+        # raise NotImplementedError
         # END ASSIGN1_3
         
         
@@ -102,7 +112,15 @@ class Network(minitorch.Module):
         # 5. Apply sigmoid and reshape to (batch)
         # HINT: You can use minitorch.dropout for dropout, and minitorch.tensor.relu for ReLU
         
-        raise NotImplementedError
+        output = embeddings.mean(1)
+        output = self.linear1(output)
+        output = minitorch.tensor.relu(output)
+        output = minitorch.dropout(output, self.dropout_prob)
+        output = self.linear2(output)
+        return minitorch.tensor.sigmoid(output).view(output.shape[0])
+
+
+        # raise NotImplementedError
     
         # END ASSIGN1_3
 
