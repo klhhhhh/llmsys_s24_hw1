@@ -33,8 +33,8 @@ class Linear(minitorch.Module):
         # 2. Initialize self.bias to be a random parameter of (out_size)
         # 3. Set self.out_size to be out_size
         # HINT: make sure to use the RParam function
-        self.weights = minitorch.rand((in_size, out_size), backend=BACKEND)
-        self.bias = minitorch.rand((out_size), backend=BACKEND)
+        self.weights = RParam(in_size, out_size)
+        self.bias = RParam(out_size)
         self.out_size = out_size
 
         # raise NotImplementedError
@@ -53,9 +53,10 @@ class Linear(minitorch.Module):
         # 4. Add self.bias
         # HINT: You can use the view function of minitorch.tensor for reshape
         x.view(batch, in_size)
-        output = x @ self.weights
-        output.view(batch, self.out_size)
-        output = minitorch.add(output, self.bias)
+        self.weights.update(self.weights.value.view(in_size, self.out_size))
+        output = x @ self.weights.value
+        output = output.view(batch, self.out_size)
+        output = output + self.bias.value
         return output
         # raise NotImplementedError
     
@@ -111,13 +112,17 @@ class Network(minitorch.Module):
         # 4. Apply the second linear layer
         # 5. Apply sigmoid and reshape to (batch)
         # HINT: You can use minitorch.dropout for dropout, and minitorch.tensor.relu for ReLU
-        
-        output = embeddings.mean(1)
+        batch, sequence_length, embedding_dim = embeddings.shape
+
+        if embedding_dim != self.embedding_dim:
+            raise ValueError("embedding_dim must be equal to the dimension of the embeddings")
+
+        output = embeddings.mean(1).view(batch, self.embedding_dim)
         output = self.linear1(output)
-        output = minitorch.tensor.relu(output)
+        output.relu()
         output = minitorch.dropout(output, self.dropout_prob)
         output = self.linear2(output)
-        return minitorch.tensor.sigmoid(output).view(output.shape[0])
+        return output.sigmoid().view(output.shape[0])
 
 
         # raise NotImplementedError
