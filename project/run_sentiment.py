@@ -124,7 +124,6 @@ class Network(minitorch.Module):
         output = self.linear2(output)
         return output.sigmoid().view(output.shape[0])
 
-
         # raise NotImplementedError
     
         # END ASSIGN1_3
@@ -219,7 +218,13 @@ class SentenceSentimentTrain:
                 # 5. Call backward function of the loss
                 # 6. Use Optimizer to take a gradient step
                 
-                raise NotImplementedError
+                x = minitorch.tensor(X_train[example_num: min(example_num+batch_size, n_training_samples)], backend = BACKEND,requires_grad=True)
+                y = minitorch.tensor(y_train[example_num: min(example_num+batch_size, n_training_samples)], backend = BACKEND,requires_grad=True)
+                out = model(x)
+                loss = minitorch.BCELoss(out, y)
+                loss.backward()
+                optim.step()
+                # raise NotImplementedError
                 # END ASSIGN1_4
                 
                 
@@ -241,7 +246,11 @@ class SentenceSentimentTrain:
                 # 3. Obtain validation predictions using the get_predictions_array function, and add to the validation_predictions list
                 # 4. Obtain the validation accuracy using the get_accuracy function, and add to the validation_accuracy list
                 
-                raise NotImplementedError
+                x = minitorch.tensor(X_val, backend = BACKEND)
+                y = minitorch.tensor(y_val, backend = BACKEND)
+                validation_predictions += get_predictions_array(y, model(x))
+                validation_accuracy.append(get_accuracy(validation_predictions))
+                # raise NotImplementedError
                 
                 # END ASSIGN1_4
                 
