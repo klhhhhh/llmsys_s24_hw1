@@ -26,6 +26,7 @@ from .tensor_functions import (
     Mul,
     Neg,
     Permute,
+    PowerScalar,
     ReLU,
     Sigmoid,
     Sum,
@@ -155,6 +156,9 @@ class Tensor:
 
     def __mul__(self, b: TensorLike) -> Tensor:
         return Mul.apply(self, self._ensure_tensor(b))
+    
+    def __pow__(self, b: TensorLike) -> Tensor:
+        return PowerScalar.apply(self, self._ensure_tensor(b))
 
     def __truediv__(self, b: TensorLike) -> Tensor:
         return Mul.apply(self, Inv.apply(self._ensure_tensor(b)))
@@ -183,6 +187,9 @@ class Tensor:
 
     def __rmul__(self, b: TensorLike) -> Tensor:
         return self * b
+    
+    def __rpow__(self, b: TensorLike) -> Tensor:
+        return self ** b
 
     def all(self, dim: Optional[int] = None) -> Tensor:
         if dim is None:
