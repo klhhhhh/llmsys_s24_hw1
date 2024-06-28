@@ -122,7 +122,7 @@ class Network(minitorch.Module):
         output.relu()
         output = minitorch.dropout(output, self.dropout_prob)
         output = self.linear2(output)
-        return output.sigmoid().view(output.shape[0])
+        return output.sigmoid().view(batch)
 
         # raise NotImplementedError
     
@@ -217,11 +217,10 @@ class SentenceSentimentTrain:
                 # 4. Calculate the loss using Binary Crossentropy Loss
                 # 5. Call backward function of the loss
                 # 6. Use Optimizer to take a gradient step
-                
                 x = minitorch.tensor(X_train[example_num: min(example_num+batch_size, n_training_samples)], backend = BACKEND,requires_grad=True)
                 y = minitorch.tensor(y_train[example_num: min(example_num+batch_size, n_training_samples)], backend = BACKEND,requires_grad=True)
                 out = model(x)
-                loss = minitorch.BCELoss(out, y)
+                loss = - ((y * out.log() + (-y + 1) * ((-out + 1).log())).sum() / min(batch_size, n_training_samples - example_num))
                 loss.backward()
                 optim.step()
                 # raise NotImplementedError
