@@ -217,10 +217,11 @@ class SentenceSentimentTrain:
                 # 4. Calculate the loss using Binary Crossentropy Loss
                 # 5. Call backward function of the loss
                 # 6. Use Optimizer to take a gradient step
-                x = minitorch.tensor(X_train[example_num: min(example_num+batch_size, n_training_samples)], backend = BACKEND,requires_grad=True)
-                y = minitorch.tensor(y_train[example_num: min(example_num+batch_size, n_training_samples)], backend = BACKEND,requires_grad=True)
+                sample_num = min(batch_size, n_training_samples - example_num)
+                x = minitorch.tensor(X_train[example_num: example_num + sample_num], backend = BACKEND,requires_grad=True)
+                y = minitorch.tensor(y_train[example_num: example_num + sample_num], backend = BACKEND,requires_grad=True)
                 out = model(x)
-                loss = - ((y * out.log() + (-y + 1) * ((-out + 1).log())).sum() / min(batch_size, n_training_samples - example_num))
+                loss = - ((y * out.log() + (-y + 1) * ((-out + 1).log())).sum() / sample_num)
                 loss.backward()
                 optim.step()
                 # raise NotImplementedError
@@ -324,7 +325,7 @@ def encode_sentiment_data(dataset, pretrained_embeddings, N_train, N_val=0):
 if __name__ == "__main__":
     train_size = 450
     validation_size = 100
-    learning_rate = 0.25
+    learning_rate = 0.05
     max_epochs = 250
     embedding_dim = 50
 
